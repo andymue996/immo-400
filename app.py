@@ -1,4 +1,4 @@
- import sqlite3
+import sqlite3
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
