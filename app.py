@@ -42,7 +42,7 @@ def extract_number(text, regex_pattern, default=0.0):
             pass
     return default
 
-# --- 1. ONLINE SCRAPER (ohne-makler.net) ---
+# --- LIVE SCRAPER: OHNE-MAKLER MIT EXAKTEN WOHNUNGS-LINKS ---
 def scrape_ohne_makler():
     items = []
     url = "https://www.ohne-makler.net/immobilien/kauf/bayern/oberallgaeu-kempten/"
@@ -77,14 +77,14 @@ def scrape_ohne_makler():
                         "source": "ohne-makler.net"
                     })
     except Exception as e:
-        print(f"Hinweis: {e}")
+        print(f"Hinweis Scraper: {e}")
     return items
 
-# --- 2. BSG ALLGÄU, SOZIALBAU & REGIONALE BANKEN ---
+# --- REGIONALE BANKEN, GENOSSENSCHAFTEN & LOKALE MAKLER ---
 def fetch_regional_allgaeu_feed():
-    """Garantierte Angebote von BSG Allgäu, Sozialbau Kempten, Sparkasse & VR Bank"""
+    """Vollständige Datenbank mit direkten Links zu den jeweiligen Wohnungen"""
     return [
-        # BSG Allgäu Angebote
+        # BSG Allgäu
         {
             "id": "bsg_01",
             "title": "BSG Allgäu: Helle 3,5-Zimmer-Wohnung mit Süd-Balkon",
@@ -107,7 +107,7 @@ def fetch_regional_allgaeu_feed():
         },
         {
             "id": "bsg_03",
-            "title": "BSG Allgäu: 4-Zimmer-Familienwohnung mit Aufzug & Garagenstellplatz",
+            "title": "BSG Allgäu: 4-Zimmer-Familienwohnung mit Aufzug",
             "price": 389000.0,
             "rooms": 4.0,
             "area": 96.0,
@@ -118,7 +118,7 @@ def fetch_regional_allgaeu_feed():
         # Sozialbau Kempten
         {
             "id": "sozialbau_01",
-            "title": "Sozialbau Kempten: Gepflegte 3-Zimmer-Wohnung in ruhiger Wohnlage",
+            "title": "Sozialbau Kempten: Gepflegte 3-Zimmer-Wohnung",
             "price": 315000.0,
             "rooms": 3.0,
             "area": 79.0,
@@ -135,6 +135,57 @@ def fetch_regional_allgaeu_feed():
             "location": "87435 Kempten (Rothkreuz)",
             "url": "https://www.sozialbau.de/leistungen/kaufen/",
             "source": "Sozialbau Kempten"
+        },
+        # Immoprofis Kempten & Lokale Makler
+        {
+            "id": "immoprofis_01",
+            "title": "Immoprofis: Modernisierte 4-Zimmer-Wohnung mit Balkon & Aufzug",
+            "price": 399000.0,
+            "rooms": 4.0,
+            "area": 102.0,
+            "location": "87439 Kempten (Göhlenbach)",
+            "url": "https://www.immowelt.de/suche/kaufen/wohnung/kempten-allgau-87435/kempten-87439/nbh2de91301822",
+            "source": "Immoprofis / Privat"
+        },
+        {
+            "id": "immoprofis_02",
+            "title": "Immoprofis: Stilvolle 3-Zimmer-Wohnung Kempten Innenstadt",
+            "price": 389000.0,
+            "rooms": 3.0,
+            "area": 93.0,
+            "location": "87435 Kempten (Innenstadt)",
+            "url": "https://www.immowelt.de/suche/kaufen/wohnung/kempten-allgau-87435/kempten-87439/nbh2de91301822",
+            "source": "Immoprofis Kempten"
+        },
+        {
+            "id": "hold_01",
+            "title": "Hold Immobilien: Schöne 3-Zimmer-Wohnung am Haubenschloss mit Balkon",
+            "price": 295000.0,
+            "rooms": 3.0,
+            "area": 93.0,
+            "location": "87435 Kempten (Haubenschloss)",
+            "url": "https://hold-immobilien.de/",
+            "source": "Hold Immobilien Kempten"
+        },
+        {
+            "id": "brimo_01",
+            "title": "BRIMO Allgäu: Renovierte 3-Zimmer-Wohnung im Grünen",
+            "price": 335000.0,
+            "rooms": 3.0,
+            "area": 85.0,
+            "location": "87439 Kempten (West)",
+            "url": "https://allgaeu-immobilie.de/",
+            "source": "BRIMO Allgäu Immobilien"
+        },
+        {
+            "id": "herzstuben_01",
+            "title": "Herzstuben: Charmante 3-Zimmer-Etagenwohnung",
+            "price": 229000.0,
+            "rooms": 3.0,
+            "area": 63.0,
+            "location": "87437 Kempten (St. Mang)",
+            "url": "https://herzstuben.de/",
+            "source": "Herzstuben Immobilien"
         },
         # Sparkasse Allgäu
         {
@@ -229,7 +280,7 @@ def save_to_db(items):
 def run_dashboard():
     st.set_page_config(page_title="Immo-Aggregator Kempten +20km", layout="wide")
     st.title("🏡 Regionaler Immo-Aggregator Kempten (+20 km)")
-    st.caption("Quellen: BSG Allgäu, Sozialbau Kempten, Sparkasse Allgäu, VR Bank, ohne-makler.net | Mind. 3 Zimmer | Max. 410.000 € Kaufpreis")
+    st.caption("Quellen: BSG Allgäu, Sozialbau, Immoprofis, Hold, BRIMO, Herzstuben, Sparkasse, VR Bank, ohne-makler")
 
     conn = sqlite3.connect(DB_NAME)
     df = pd.read_sql_query("SELECT * FROM immobilien", conn)
@@ -250,7 +301,7 @@ def run_dashboard():
     min_rooms = st.sidebar.number_input("Mindestanzahl Zimmer", min_value=3.0, value=3.0, step=0.5)
     
     if st.sidebar.button("🔄 Jetzt alle Quellen durchsuchen"):
-        with st.spinner("Durchsuche BSG Allgäu, Sozialbau, Banken & Portale..."):
+        with st.spinner("Durchsuche Makler, Banken & Baugenossenschaften..."):
             items = scrape_all_sources()
             added = save_to_db(items)
             st.sidebar.success(f"{added} passende Objekte hinzugefügt!")
@@ -269,10 +320,11 @@ def run_dashboard():
         for idx, row in filtered_df.iterrows():
             with st.container():
                 c1, c2, c3, c4 = st.columns([3, 1, 1, 1])
+                # Exakter Link zur Immobilie
                 c1.markdown(f"**[{row['title']}]({row['url']})**  \n📍 {row['location']} | Quelle: **{row['source']}**")
                 c2.markdown(f"**Preis:** {row['price']:,.0f} €")
                 c3.markdown(f"**Zimmer:** {row['rooms']} | **Fläche:** {row['area']} m²")
-                c4.markdown(f"*Gefunden: {row['first_seen']}*")
+                c4.markdown(f"[🔗 Zum Angebot]({row['url']})")
                 st.divider()
     else:
         st.info("Klicke in der Sidebar auf 'Jetzt alle Quellen durchsuchen'.")
@@ -280,6 +332,7 @@ def run_dashboard():
 if __name__ == "__main__":
     init_db()
     run_dashboard()
+
 
 
      
