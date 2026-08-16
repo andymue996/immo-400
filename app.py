@@ -80,7 +80,7 @@ def scrape_ohne_makler():
         print(f"Hinweis Scraper: {e}")
     return items
 
-# --- 2. DIE 19 FESTEN KEMPTEN-ANGEBOTE ---
+# --- 2. BEREINIGTE BASTANDSANZEIGEN (OHNE BSG, KLEINANZEIGEN, SOZIALBAU & HERZSTUBEN) ---
 def fetch_regional_allgaeu_feed():
     return [
         # Sparkasse Allgäu
@@ -145,59 +145,7 @@ def fetch_regional_allgaeu_feed():
             "url": "https://www.vrbank-ke-oa.de/privatkunden/immobilie-und-wohnen/produkte/immobilien/immobiliensuche.html",
             "source": "VR Bank Kempten-Oberallgäu"
         },
-        # BSG Allgäu
-        {
-            "id": "bsg_01",
-            "title": "BSG Allgäu: Helle 3,5-Zimmer-Wohnung mit Süd-Balkon",
-            "price": 339000.0,
-            "rooms": 3.5,
-            "area": 84.0,
-            "location": "87437 Kempten (Sankt Mang)",
-            "url": "https://www.bsg-allgaeu.de/gebrauchtimmobilien/",
-            "source": "BSG Allgäu"
-        },
-        {
-            "id": "bsg_02",
-            "title": "BSG Allgäu: Modernisierte 3-Zimmer-Eigentumswohnung",
-            "price": 298000.0,
-            "rooms": 3.0,
-            "area": 76.0,
-            "location": "87435 Kempten (Zentrumsnäh)",
-            "url": "https://www.bsg-allgaeu.de/gebrauchtimmobilien/",
-            "source": "BSG Allgäu"
-        },
-        {
-            "id": "bsg_03",
-            "title": "BSG Allgäu: Großzügige 4-Zimmer-Wohnung in Kempten-Ost",
-            "price": 405000.0,
-            "rooms": 4.0,
-            "area": 105.0,
-            "location": "87437 Kempten-Ost",
-            "url": "https://www.bsg-allgaeu.de/gebrauchtimmobilien/",
-            "source": "BSG Allgäu"
-        },
-        # Sozialbau Kempten
-        {
-            "id": "sozialbau_01",
-            "title": "Sozialbau Kempten: Gepflegte 3-Zimmer-Wohnung",
-            "price": 315000.0,
-            "rooms": 3.0,
-            "area": 79.0,
-            "location": "87435 Kempten (Haubenschloss)",
-            "url": "https://www.sozialbau.de/leistungen/kaufen/",
-            "source": "Sozialbau Kempten"
-        },
-        {
-            "id": "sozialbau_02",
-            "title": "Sozialbau Kempten: 3.5-Zimmer-Etagenwohnung",
-            "price": 355000.0,
-            "rooms": 3.5,
-            "area": 86.0,
-            "location": "87439 Kempten (Lenzfried)",
-            "url": "https://www.sozialbau.de/leistungen/kaufen/",
-            "source": "Sozialbau Kempten"
-        },
-        # Weitere lokale Anbieter
+        # Lokale Makler
         {
             "id": "immoprofis_01",
             "title": "Immoprofis: Modernisierte 4-Zimmer-Wohnung mit Balkon & Aufzug",
@@ -228,37 +176,7 @@ def fetch_regional_allgaeu_feed():
             "url": "https://allgaeu-immobilie.de/",
             "source": "BRIMO Allgäu Immobilien"
         },
-        {
-            "id": "herzstuben_01",
-            "title": "Herzstuben: Charmante 3-Zimmer-Etagenwohnung",
-            "price": 229000.0,
-            "rooms": 3.0,
-            "area": 63.0,
-            "location": "87437 Kempten (St. Mang)",
-            "url": "https://herzstuben.de/",
-            "source": "Herzstuben Immobilien"
-        },
         # Portale
-        {
-            "id": "kleinanzeigen_01",
-            "title": "Kleinanzeigen: Privatverkauf 3-Zimmer-Wohnung in Waltenhofen",
-            "price": 289000.0,
-            "rooms": 3.0,
-            "area": 75.0,
-            "location": "87448 Waltenhofen",
-            "url": "https://www.kleinanzeigen.de/s-wohnung-kaufen/kempten/c196l7586r20",
-            "source": "Kleinanzeigen Privat"
-        },
-        {
-            "id": "kleinanzeigen_02",
-            "title": "Kleinanzeigen: Gepflegte 4-Zimmer-Wohnung mit Gartenanteil",
-            "price": 378000.0,
-            "rooms": 4.0,
-            "area": 98.0,
-            "location": "87471 Durach",
-            "url": "https://www.kleinanzeigen.de/s-wohnung-kaufen/kempten/c196l7586r20",
-            "source": "Kleinanzeigen Privat"
-        },
         {
             "id": "immoscout_01",
             "title": "ImmoScout24: 3-Zimmer-Neubauwohnung in Kempten",
@@ -363,6 +281,7 @@ def run_dashboard():
 if __name__ == "__main__":
     init_db()
     run_dashboard()
+
 
 
 
