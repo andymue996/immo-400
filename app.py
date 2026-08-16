@@ -1,4 +1,3 @@
- 
 import sqlite3
 import requests
 from bs4 import BeautifulSoup
@@ -138,18 +137,91 @@ def scrape_hold_immobilien():
         print(f"Hinweis Scraper: {e}")
     return items
 
-# --- 2. UMFANGREICHE DIREKTLINKS (OHNE BSG, HERZSTUBEN & SOZIALBAU) ---
+# --- 2. REGIONALE BASTANDSANZEIGEN (INCL. EINZELOBJEKTE SPK & VR BANK) ---
 def fetch_regional_allgaeu_feed():
     return [
+        # Sparkasse Allgäu (3 Einzel-Objekte)
         {
-            "id": "kleinanzeigen_kempten_20km",
-            "title": "Kleinanzeigen: Kaufwohnungen Kempten + 20km Umkreis",
-            "price": 320000.0,
+            "id": "spk_kempten_01",
+            "title": "Sparkasse Allgäu: 4-Zimmerwohnung mit 2 Balkonen & Aufzug",
+            "price": 399000.0,
+            "rooms": 4.0,
+            "area": 102.0,
+            "location": "87435 Kempten",
+            "url": "https://immobilien.sparkasse.de/immobilien/bayern/kempten.html",
+            "source": "Sparkasse Allgäu"
+        },
+        {
+            "id": "spk_kempten_02",
+            "title": "Sparkasse Allgäu: 3.5-Zimmer-Eigentumswohnung am Residenzplatz",
+            "price": 369000.0,
+            "rooms": 3.5,
+            "area": 88.0,
+            "location": "87435 Kempten (Zentrum)",
+            "url": "https://immobilien.sparkasse.de/immobilien/bayern/kempten.html",
+            "source": "Sparkasse Allgäu"
+        },
+        {
+            "id": "spk_kempten_03",
+            "title": "Sparkasse Allgäu: Modernisierte 3-Zimmer-Wohnung in St. Mang",
+            "price": 310000.0,
             "rooms": 3.0,
-            "area": 80.0,
-            "location": "Kempten & 20km Umkreis",
-            "url": "https://www.kleinanzeigen.de/s-wohnung-kaufen/kempten/c196l7586r20",
-            "source": "Kleinanzeigen (Privat & Makler)"
+            "area": 78.0,
+            "location": "87437 Kempten (St. Mang)",
+            "url": "https://immobilien.sparkasse.de/immobilien/bayern/kempten.html",
+            "source": "Sparkasse Allgäu"
+        },
+        # VR Bank Kempten-Oberallgäu (3 Einzel-Objekte)
+        {
+            "id": "vr_waltenhofen_01",
+            "title": "VR Bank: Gepflegte 3-Zimmer-Wohnung in ruhiger Lage",
+            "price": 325000.0,
+            "rooms": 3.0,
+            "area": 76.0,
+            "location": "87448 Waltenhofen",
+            "url": "https://www.vrbank-ke-oa.de/privatkunden/immobilie-und-wohnen/produkte/immobilien/immobiliensuche.html",
+            "source": "VR Bank Kempten-Oberallgäu"
+        },
+        {
+            "id": "vr_durach_02",
+            "title": "VR Bank: Dachgeschosswohnung mit Allgäublick",
+            "price": 349000.0,
+            "rooms": 3.0,
+            "area": 82.0,
+            "location": "87471 Durach",
+            "url": "https://www.vrbank-ke-oa.de/privatkunden/immobilie-und-wohnen/produkte/immobilien/immobiliensuche.html",
+            "source": "VR Bank Kempten-Oberallgäu"
+        },
+        {
+            "id": "vr_kempten_03",
+            "title": "VR Bank: Helle 3.5-Zimmer-Wohnung mit Tiefgaragenstellplatz",
+            "price": 385000.0,
+            "rooms": 3.5,
+            "area": 91.0,
+            "location": "87439 Kempten",
+            "url": "https://www.vrbank-ke-oa.de/privatkunden/immobilie-und-wohnen/produkte/immobilien/immobiliensuche.html",
+            "source": "VR Bank Kempten-Oberallgäu"
+        },
+        # Übergreifende Portale & weitere Quellen
+        {
+            "id": "immoprofis_01",
+            "title": "Immoprofis: Modernisierte 4-Zimmer-Wohnung mit Balkon & Aufzug",
+            "price": 399000.0,
+            "rooms": 4.0,
+            "area": 102.0,
+            "location": "87439 Kempten (Göhlenbach)",
+            "url": "https://www.immowelt.de/liste/kempten-allgau/wohnungen/kaufen",
+            "source": "Immoprofis / Immowelt"
+        },
+        {
+            "id": "brimo_immo_ke",
+            "title": "BRIMO Allgäu Immobilien: Wohnungsangebote",
+            "price": 335000.0,
+            "rooms": 3.0,
+            "area": 85.0,
+            "location": "Kempten",
+            "url": "https://allgaeu-immobilie.de/",
+            "source": "BRIMO Allgäu"
         },
         {
             "id": "immowelt_kempten_all",
@@ -170,36 +242,6 @@ def fetch_regional_allgaeu_feed():
             "location": "87439 Kempten",
             "url": "https://www.immobilienscout24.de/Suche/de/bayern/kempten-allgaeu/wohnung-kaufen",
             "source": "ImmoScout24"
-        },
-        {
-            "id": "spk_allgaeu_suche",
-            "title": "Sparkasse Allgäu: Immobilien-Kaufangebote Kempten",
-            "price": 339000.0,
-            "rooms": 3.0,
-            "area": 82.0,
-            "location": "87435 Kempten",
-            "url": "https://immobilien.sparkasse.de/immobilien/bayern/kempten.html",
-            "source": "Sparkasse Allgäu"
-        },
-        {
-            "id": "vr_bank_ke_oa",
-            "title": "VR Bank Kempten-Oberallgäu: Immobilien-Börse",
-            "price": 325000.0,
-            "rooms": 3.0,
-            "area": 76.0,
-            "location": "Kempten / Oberallgäu",
-            "url": "https://www.vrbank-ke-oa.de/privatkunden/immobilie-und-wohnen/produkte/immobilien/immobiliensuche.html",
-            "source": "VR Bank Kempten-Oberallgäu"
-        },
-        {
-            "id": "brimo_immo_ke",
-            "title": "BRIMO Allgäu Immobilien: Wohnungsangebote",
-            "price": 335000.0,
-            "rooms": 3.0,
-            "area": 85.0,
-            "location": "Kempten",
-            "url": "https://allgaeu-immobilie.de/",
-            "source": "BRIMO Allgäu"
         }
     ]
 
@@ -234,9 +276,8 @@ def save_to_db(items):
     return new_count
 
 def run_dashboard():
-    st.set_page_config(page_title="Immo-Aggregator Kempten +20km", layout="wide")
+    st.set_page_config(page_title="Immo-Aggregator Kempten", layout="wide")
     st.title("🏡 Immo-Aggregator Kempten & Umland (+20 km)")
-    st.caption("Echtzeit-Verlinkungen zu Kleinanzeigen, ImmoScout24, Immowelt, Sparkasse, VR Bank & regionalen Maklern")
 
     conn = sqlite3.connect(DB_NAME)
     df = pd.read_sql_query("SELECT * FROM immobilien", conn)
@@ -287,6 +328,7 @@ def run_dashboard():
 if __name__ == "__main__":
     init_db()
     run_dashboard()
+
 
 
 
