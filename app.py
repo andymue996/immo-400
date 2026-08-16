@@ -1,3 +1,4 @@
+ 
 import sqlite3
 import requests
 from bs4 import BeautifulSoup
@@ -44,14 +45,6 @@ def extract_number(text, regex_pattern, default=0.0):
 
 # --- 1. SCRAPER OHNE-MAKLER ---
 def scrape_ohne_makler():
-    """
-    AKTUALISIERT (16.08.2026): Die ursprüngliche Version dieser Funktion nutzte
-    geratene CSS-Klassen (article, .om-estate-card, tr, .row), die auf der
-    echten Seite nicht existierten -> 0 Treffer. Verifiziert wurde: die Seite
-    liefert Angebote serverseitig aus, jede Karte ist EIN <a href="/immobilie/<ID>/">
-    -Link, der Titel, Preis, PLZ/Ort und Eckdaten im Linktext bündelt. Deshalb
-    hier direkt der URL-Pattern-Ansatz statt Karten-Selektor.
-    """
     items = []
     url = "https://www.ohne-makler.net/immobilien/wohnung-kaufen/bayern/kempten-allgau/"
     try:
@@ -66,7 +59,7 @@ def scrape_ohne_makler():
                     continue
                 listing_id = m.group(1)
                 if listing_id in seen_ids:
-                    continue  # jede Karte erscheint als Bild-Link UND Text-Link -> dedupen
+                    continue  
                 text = a.get_text(" ", strip=True)
                 if "€" not in text:
                     continue
@@ -96,14 +89,6 @@ def scrape_ohne_makler():
 
 # --- 1b. SCRAPER HOLD IMMOBILIEN ---
 def scrape_hold_immobilien():
-    """
-    NEU (16.08.2026): Verifiziert - Hold Immobilien liefert Angebote
-    serverseitig aus (Propstack-Widget). Jedes Angebot hat einen Detail-Link
-    nach dem Muster https://hold-immobilien.de/immobilien-kaufen/<slug> .
-    Preis/Zimmer/Fläche stehen im umgebenden Karten-Container, nicht im
-    Linktext selbst - wir klettern deshalb im DOM nach oben, bis der Text
-    "Zimmer" und "Kaufpreis"/"EUR" enthält.
-    """
     items = []
     url = "https://hold-immobilien.de/immobilien-kaufen"
     try:
@@ -114,7 +99,7 @@ def scrape_hold_immobilien():
             for a in soup.select('a[href*="/immobilien-kaufen/"]'):
                 href = a.get("href", "")
                 if href.rstrip("/").endswith("/immobilien-kaufen"):
-                    continue  # Nav-Link zur Übersicht, keine Detailseite
+                    continue  
                 if href in seen:
                     continue
 
@@ -142,7 +127,7 @@ def scrape_hold_immobilien():
                 items.append({
                     "id": f"hold_{abs(hash(href))}",
                     "title": title,
-                    "price": price if price > 0 else 0.0,  # 0.0 = "Preis auf Anfrage"
+                    "price": price if price > 0 else 0.0,  
                     "rooms": rooms,
                     "area": area,
                     "location": "Allgäu",
@@ -153,7 +138,7 @@ def scrape_hold_immobilien():
         print(f"Hinweis Scraper: {e}")
     return items
 
-# --- 2. UMFANGREICHE DIREKTLINKS ZU ALLGÄUER PORTALEN & BANKEN ---
+# --- 2. UMFANGREICHE DIREKTLINKS (OHNE BSG, HERZSTUBEN & SOZIALBAU) ---
 def fetch_regional_allgaeu_feed():
     return [
         {
@@ -207,26 +192,6 @@ def fetch_regional_allgaeu_feed():
             "source": "VR Bank Kempten-Oberallgäu"
         },
         {
-            "id": "bsg_allgaeu_kaufen",
-            "title": "BSG Allgäu: Gebrauchtimmobilien & Eigentumswohnungen",
-            "price": 339000.0,
-            "rooms": 3.5,
-            "area": 84.0,
-            "location": "Kempten & Region",
-            "url": "https://www.bsg-allgaeu.de/gebrauchtimmobilien/",
-            "source": "BSG Allgäu"
-        },
-        {
-            "id": "sozialbau_kempten_kauf",
-            "title": "Sozialbau Kempten: Eigentumswohnungen zum Kauf",
-            "price": 315000.0,
-            "rooms": 3.0,
-            "area": 79.0,
-            "location": "87435 Kempten",
-            "url": "https://www.sozialbau.de/leistungen/kaufen/",
-            "source": "Sozialbau Kempten"
-        },
-        {
             "id": "brimo_immo_ke",
             "title": "BRIMO Allgäu Immobilien: Wohnungsangebote",
             "price": 335000.0,
@@ -235,16 +200,6 @@ def fetch_regional_allgaeu_feed():
             "location": "Kempten",
             "url": "https://allgaeu-immobilie.de/",
             "source": "BRIMO Allgäu"
-        },
-        {
-            "id": "herzstuben_immo",
-            "title": "Herzstuben Immobilien: Regionale Angebote",
-            "price": 229000.0,
-            "rooms": 3.0,
-            "area": 63.0,
-            "location": "Kempten & Umgebung",
-            "url": "https://herzstuben.de/",
-            "source": "Herzstuben Immobilien"
         }
     ]
 
@@ -269,7 +224,6 @@ def save_to_db(items):
             ''', (item['id'], item['title'], item['price'], item['rooms'], item['area'], item['location'], item['url'], item['source'], today))
             new_count += 1
         except sqlite3.IntegrityError:
-            # Bei doppelten IDs aktualisieren wir die Daten
             c.execute('''
                 UPDATE immobilien 
                 SET title=?, price=?, rooms=?, area=?, location=?, url=?, source=?
@@ -282,7 +236,7 @@ def save_to_db(items):
 def run_dashboard():
     st.set_page_config(page_title="Immo-Aggregator Kempten +20km", layout="wide")
     st.title("🏡 Immo-Aggregator Kempten & Umland (+20 km)")
-    st.caption("Echtzeit-Verlinkungen zu Kleinanzeigen, ImmoScout24, Immowelt, Sparkasse, VR Bank, BSG, Sozialbau & regionalen Maklern")
+    st.caption("Echtzeit-Verlinkungen zu Kleinanzeigen, ImmoScout24, Immowelt, Sparkasse, VR Bank & regionalen Maklern")
 
     conn = sqlite3.connect(DB_NAME)
     df = pd.read_sql_query("SELECT * FROM immobilien", conn)
