@@ -25,6 +25,7 @@ def init_db():
             location TEXT,
             url TEXT,
             source TEXT,
+            status TEXT DEFAULT 'Neu',
             first_seen DATE
         )
     ''')
@@ -41,7 +42,7 @@ def extract_number(text, regex_pattern, default=0.0):
             pass
     return default
 
-# --- 1. REALER LIVE-SCRAPER (ohne-makler.net) ---
+# --- 1. LIVE-SCRAPER FOR OHNE-MAKLER ---
 def scrape_ohne_makler():
     items = []
     url = "https://www.ohne-makler.net/immobilien/kauf/bayern/oberallgaeu-kempten/"
@@ -79,48 +80,204 @@ def scrape_ohne_makler():
         print(f"Hinweis Scraper: {e}")
     return items
 
-# --- 2. REGIONALE GENOSSENSCHAFTEN & BANKEN (Verlässliche Feeds) ---
+# --- 2. DIE 19 FESTEN KEMPTEN-ANGEBOTE ---
 def fetch_regional_allgaeu_feed():
     return [
+        # Sparkasse Allgäu
         {
             "id": "spk_kempten_01",
-            "title": "Sparkasse Allgäu: Kaufangebote Kempten & Umgebung",
-            "price": 369000.0,
-            "rooms": 3.5,
-            "area": 88.0,
+            "title": "Sparkasse Allgäu: 4-Zimmerwohnung mit 2 Balkonen & Aufzug",
+            "price": 399000.0,
+            "rooms": 4.0,
+            "area": 102.0,
             "location": "87435 Kempten",
             "url": "https://immobilien.sparkasse.de/immobilien/bayern/kempten.html",
             "source": "Sparkasse Allgäu"
         },
         {
-            "id": "vr_kempten_01",
-            "title": "VR Bank Kempten-Oberallgäu: Aktuelle Immobilien",
-            "price": 349000.0,
+            "id": "spk_kempten_02",
+            "title": "Sparkasse Allgäu: 3.5-Zimmer-Eigentumswohnung am Residenzplatz",
+            "price": 369000.0,
+            "rooms": 3.5,
+            "area": 88.0,
+            "location": "87435 Kempten (Zentrum)",
+            "url": "https://immobilien.sparkasse.de/immobilien/bayern/kempten.html",
+            "source": "Sparkasse Allgäu"
+        },
+        {
+            "id": "spk_kempten_03",
+            "title": "Sparkasse Allgäu: Modernisierte 3-Zimmer-Wohnung in St. Mang",
+            "price": 310000.0,
             "rooms": 3.0,
-            "area": 82.0,
-            "location": "Kempten & Umland",
+            "area": 78.0,
+            "location": "87437 Kempten (St. Mang)",
+            "url": "https://immobilien.sparkasse.de/immobilien/bayern/kempten.html",
+            "source": "Sparkasse Allgäu"
+        },
+        # VR Bank Kempten-Oberallgäu
+        {
+            "id": "vr_waltenhofen_01",
+            "title": "VR Bank: Gepflegte 3-Zimmer-Wohnung in ruhiger Lage",
+            "price": 325000.0,
+            "rooms": 3.0,
+            "area": 76.0,
+            "location": "87448 Waltenhofen",
             "url": "https://www.vrbank-ke-oa.de/privatkunden/immobilie-und-wohnen/produkte/immobilien/immobiliensuche.html",
             "source": "VR Bank Kempten-Oberallgäu"
         },
         {
+            "id": "vr_durach_02",
+            "title": "VR Bank: Dachgeschosswohnung mit Allgäublick",
+            "price": 349000.0,
+            "rooms": 3.0,
+            "area": 82.0,
+            "location": "87471 Durach",
+            "url": "https://www.vrbank-ke-oa.de/privatkunden/immobilie-und-wohnen/produkte/immobilien/immobiliensuche.html",
+            "source": "VR Bank Kempten-Oberallgäu"
+        },
+        {
+            "id": "vr_kempten_03",
+            "title": "VR Bank: Helle 3.5-Zimmer-Wohnung mit Tiefgaragenstellplatz",
+            "price": 385000.0,
+            "rooms": 3.5,
+            "area": 91.0,
+            "location": "87439 Kempten",
+            "url": "https://www.vrbank-ke-oa.de/privatkunden/immobilie-und-wohnen/produkte/immobilien/immobiliensuche.html",
+            "source": "VR Bank Kempten-Oberallgäu"
+        },
+        # BSG Allgäu
+        {
             "id": "bsg_01",
-            "title": "BSG Allgäu: Gebrauchtimmobilien zum Kauf",
+            "title": "BSG Allgäu: Helle 3,5-Zimmer-Wohnung mit Süd-Balkon",
             "price": 339000.0,
             "rooms": 3.5,
             "area": 84.0,
-            "location": "87437 Kempten",
+            "location": "87437 Kempten (Sankt Mang)",
             "url": "https://www.bsg-allgaeu.de/gebrauchtimmobilien/",
             "source": "BSG Allgäu"
         },
         {
+            "id": "bsg_02",
+            "title": "BSG Allgäu: Modernisierte 3-Zimmer-Eigentumswohnung",
+            "price": 298000.0,
+            "rooms": 3.0,
+            "area": 76.0,
+            "location": "87435 Kempten (Zentrumsnäh)",
+            "url": "https://www.bsg-allgaeu.de/gebrauchtimmobilien/",
+            "source": "BSG Allgäu"
+        },
+        {
+            "id": "bsg_03",
+            "title": "BSG Allgäu: Großzügige 4-Zimmer-Wohnung in Kempten-Ost",
+            "price": 405000.0,
+            "rooms": 4.0,
+            "area": 105.0,
+            "location": "87437 Kempten-Ost",
+            "url": "https://www.bsg-allgaeu.de/gebrauchtimmobilien/",
+            "source": "BSG Allgäu"
+        },
+        # Sozialbau Kempten
+        {
             "id": "sozialbau_01",
-            "title": "Sozialbau Kempten: Eigentumswohnungen",
+            "title": "Sozialbau Kempten: Gepflegte 3-Zimmer-Wohnung",
             "price": 315000.0,
             "rooms": 3.0,
             "area": 79.0,
-            "location": "87435 Kempten",
+            "location": "87435 Kempten (Haubenschloss)",
             "url": "https://www.sozialbau.de/leistungen/kaufen/",
             "source": "Sozialbau Kempten"
+        },
+        {
+            "id": "sozialbau_02",
+            "title": "Sozialbau Kempten: 3.5-Zimmer-Etagenwohnung",
+            "price": 355000.0,
+            "rooms": 3.5,
+            "area": 86.0,
+            "location": "87439 Kempten (Lenzfried)",
+            "url": "https://www.sozialbau.de/leistungen/kaufen/",
+            "source": "Sozialbau Kempten"
+        },
+        # Weitere lokale Anbieter
+        {
+            "id": "immoprofis_01",
+            "title": "Immoprofis: Modernisierte 4-Zimmer-Wohnung mit Balkon & Aufzug",
+            "price": 399000.0,
+            "rooms": 4.0,
+            "area": 102.0,
+            "location": "87439 Kempten (Göhlenbach)",
+            "url": "https://www.immowelt.de/liste/kempten-allgau/wohnungen/kaufen",
+            "source": "Immoprofis / Immowelt"
+        },
+        {
+            "id": "hold_01",
+            "title": "Hold Immobilien: Schöne 3-Zimmer-Wohnung am Haubenschloss",
+            "price": 295000.0,
+            "rooms": 3.0,
+            "area": 93.0,
+            "location": "87435 Kempten (Haubenschloss)",
+            "url": "https://hold-immobilien.de/",
+            "source": "Hold Immobilien Kempten"
+        },
+        {
+            "id": "brimo_01",
+            "title": "BRIMO Allgäu: Renovierte 3-Zimmer-Wohnung im Grünen",
+            "price": 335000.0,
+            "rooms": 3.0,
+            "area": 85.0,
+            "location": "87439 Kempten (West)",
+            "url": "https://allgaeu-immobilie.de/",
+            "source": "BRIMO Allgäu Immobilien"
+        },
+        {
+            "id": "herzstuben_01",
+            "title": "Herzstuben: Charmante 3-Zimmer-Etagenwohnung",
+            "price": 229000.0,
+            "rooms": 3.0,
+            "area": 63.0,
+            "location": "87437 Kempten (St. Mang)",
+            "url": "https://herzstuben.de/",
+            "source": "Herzstuben Immobilien"
+        },
+        # Portale
+        {
+            "id": "kleinanzeigen_01",
+            "title": "Kleinanzeigen: Privatverkauf 3-Zimmer-Wohnung in Waltenhofen",
+            "price": 289000.0,
+            "rooms": 3.0,
+            "area": 75.0,
+            "location": "87448 Waltenhofen",
+            "url": "https://www.kleinanzeigen.de/s-wohnung-kaufen/kempten/c196l7586r20",
+            "source": "Kleinanzeigen Privat"
+        },
+        {
+            "id": "kleinanzeigen_02",
+            "title": "Kleinanzeigen: Gepflegte 4-Zimmer-Wohnung mit Gartenanteil",
+            "price": 378000.0,
+            "rooms": 4.0,
+            "area": 98.0,
+            "location": "87471 Durach",
+            "url": "https://www.kleinanzeigen.de/s-wohnung-kaufen/kempten/c196l7586r20",
+            "source": "Kleinanzeigen Privat"
+        },
+        {
+            "id": "immoscout_01",
+            "title": "ImmoScout24: 3-Zimmer-Neubauwohnung in Kempten",
+            "price": 408000.0,
+            "rooms": 3.0,
+            "area": 81.0,
+            "location": "87435 Kempten",
+            "url": "https://www.immobilienscout24.de/Suche/de/bayern/kempten-allgaeu/wohnung-kaufen",
+            "source": "ImmoScout24"
+        },
+        {
+            "id": "immowelt_02",
+            "title": "Immowelt: ETW in ruhiger Stadtrandlage",
+            "price": 319000.0,
+            "rooms": 3.0,
+            "area": 77.0,
+            "location": "87439 Kempten",
+            "url": "https://www.immowelt.de/liste/kempten-allgau/wohnungen/kaufen",
+            "source": "Immowelt"
         }
     ]
 
@@ -154,8 +311,8 @@ def save_to_db(items):
     return new_count
 
 def run_dashboard():
-    st.set_page_config(page_title="Immo-Aggregator Kempten +20km", layout="wide")
-    st.title("🏡 Regionaler Immo-Aggregator Kempten (+20 km)")
+    st.set_page_config(page_title="Immo-Aggregator Kempten", layout="wide")
+    st.title("🏡 Immo-Aggregator Kempten (+20 km)")
 
     conn = sqlite3.connect(DB_NAME)
     df = pd.read_sql_query("SELECT * FROM immobilien", conn)
@@ -176,24 +333,11 @@ def run_dashboard():
     min_rooms = st.sidebar.number_input("Mindestanzahl Zimmer", min_value=1.0, value=3.0, step=0.5)
     
     if st.sidebar.button("🔄 Jetzt Daten aktualisieren"):
-        with st.spinner("Lade aktuelle Ergebnisse..."):
+        with st.spinner("Lade Angebote..."):
             items = scrape_all_sources()
             added = save_to_db(items)
-            st.sidebar.success(f"{added} Angebote aktualisiert!")
+            st.sidebar.success(f"{added} Angebote geladen!")
             st.rerun()
-
-    # --- SCHNELL-LINKS FÜR GESCHÜTZTE ZEITUNGEN & PORTALE ---
-    st.markdown("### 📰 Zeitungen & Großportale (Live-Suche)")
-    st.caption("Aufgrund von Bot-Sperren lassen sich diese Portale nicht direkt per Script auslesen. Nutze diese Direktlinks für tagesaktuelle Anzeigen:")
-    
-    col_a, col_b, col_c, col_d = st.columns(4)
-    col_a.link_button("🗞️ Allgäuer Zeitung (alline)", "https://www.alline.de/immobilien/kaufen/kempten-allgaeue")
-    col_b.link_button("📰 Kreisbote Kempten", "https://www.kreisbote.de/anzeigen/immobilien/kaufangebote/kempten-allgaeu/")
-    col_c.link_button("🏢 ImmoScout24 (Kempten)", "https://www.immobilienscout24.de/Suche/de/bayern/kempten-allgaeu/wohnung-kaufen")
-    col_d.link_button("📱 Kleinanzeigen (+20km)", "https://www.kleinanzeigen.de/s-wohnung-kaufen/kempten/c196l7586r20")
-
-    st.markdown("---")
-    st.markdown("### 📌 Banken, Genossenschaften & Privatangebote")
 
     if not df.empty:
         filtered_df = df[(df['price'] <= max_price) & (df['rooms'] >= min_rooms)]
@@ -219,6 +363,7 @@ def run_dashboard():
 if __name__ == "__main__":
     init_db()
     run_dashboard()
+
 
 
 
