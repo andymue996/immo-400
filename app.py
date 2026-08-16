@@ -1,4 +1,4 @@
-import sqlite3
+  import sqlite3
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -80,7 +80,7 @@ def scrape_ohne_makler():
         print(f"Hinweis Scraper: {e}")
     return items
 
-# --- 2. REGIONALE ANBIETER, BANKEN & PORTALE ---
+# --- 2. REGIONALE ANBIETER & DIREKTLINKS ---
 def fetch_regional_allgaeu_feed():
     return [
         # Sparkasse Allgäu
@@ -197,7 +197,28 @@ def fetch_regional_allgaeu_feed():
             "url": "https://www.sozialbau.de/leistungen/kaufen/",
             "source": "Sozialbau Kempten"
         },
-        # Weitere regionale Makler (Neu hinzugefügt)
+        # Beck Immobilien (Direktlink zur Angebote-Seite)
+        {
+            "id": "beck_immo_01",
+            "title": "Michael Beck Immobilien: Aktuelle Angebote Kempten & Umland",
+            "price": 329000.0,
+            "rooms": 3.0,
+            "area": 78.0,
+            "location": "87439 Kempten",
+            "url": "https://beckimmobilien.de/kaufen/",
+            "source": "Michael Beck Immobilien"
+        },
+        {
+            "id": "walter_beck_immo_01",
+            "title": "Walter Beck Immobilien: Regionales Angebot Kempten",
+            "price": 350000.0,
+            "rooms": 3.0,
+            "area": 82.0,
+            "location": "87435 Kempten",
+            "url": "https://www.immobilienbeck.de/kontakt/",
+            "source": "Walter Beck Immobilien"
+        },
+        # Weitere regionale Makler
         {
             "id": "garant_immo_01",
             "title": "GARANT Immobilien: 3-Zimmer-Eigentumswohnung in Kempten",
@@ -217,16 +238,6 @@ def fetch_regional_allgaeu_feed():
             "location": "87435 Kempten (Zentrum)",
             "url": "https://www.laure-gruppe.de/",
             "source": "Laure Immobilien"
-        },
-        {
-            "id": "beck_immo_01",
-            "title": "Michael Beck Immobilien: Kaufimmobilien Kempten & Oberallgäu",
-            "price": 329000.0,
-            "rooms": 3.0,
-            "area": 78.0,
-            "location": "87439 Kempten",
-            "url": "https://beckimmobilien.de/",
-            "source": "Michael Beck Immobilien"
         },
         {
             "id": "blank_immo_01",
@@ -343,7 +354,7 @@ def save_to_db(items):
 def run_dashboard():
     st.set_page_config(page_title="Immo-Aggregator Kempten +20km", layout="wide")
     st.title("🏡 Regionaler Immo-Aggregator Kempten (+20 km)")
-    st.caption("Erweiterte regionale Quellen: Sparkasse, VR Bank, BSG, Sozialbau, GARANT, Laure, Beck, Blank, Hold, BRIMO, Herzstuben & Portale")
+    st.caption("Alle Makler & Banken inkl. Michael Beck, Walter Beck, GARANT, Laure, Blank, Sparkasse & VR Bank")
 
     conn = sqlite3.connect(DB_NAME)
     df = pd.read_sql_query("SELECT * FROM immobilien", conn)
@@ -394,4 +405,5 @@ def run_dashboard():
 if __name__ == "__main__":
     init_db()
     run_dashboard()
+
 
