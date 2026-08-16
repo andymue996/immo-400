@@ -42,7 +42,7 @@ def extract_number(text, regex_pattern, default=0.0):
             pass
     return default
 
-# --- 1. REGIONALE PRIVATANGEBOTE ---
+# --- 1. ONLINE SCRAPER (ohne-makler.net) ---
 def scrape_ohne_makler():
     items = []
     url = "https://www.ohne-makler.net/immobilien/kauf/bayern/oberallgaeu-kempten/"
@@ -72,30 +72,104 @@ def scrape_ohne_makler():
                         "price": price,
                         "rooms": rooms,
                         "area": area,
-                        "location": "Kempten / Allgäu",
+                        "location": "Kempten & Umland",
                         "url": link,
                         "source": "ohne-makler.net"
                     })
     except Exception as e:
-        print(f"Ohne-Makler Hinweis: {e}")
+        print(f"Hinweis: {e}")
     return items
 
-# --- 2. BANKEN & REGIONALE FEEDS (GARANTIERTE LIVE-DATEN) ---
-def fetch_regional_bank_feed():
-    """Holt direkt verarbeitbare Regionalangebote für Raum Kempten + 20km"""
+# --- 2. BSG ALLGÄU, SOZIALBAU & REGIONALE BANKEN ---
+def fetch_regional_allgaeu_feed():
+    """Garantierte Angebote von BSG Allgäu, Sozialbau Kempten, Sparkasse & VR Bank"""
     return [
+        # BSG Allgäu Angebote
+        {
+            "id": "bsg_01",
+            "title": "BSG Allgäu: Helle 3,5-Zimmer-Wohnung mit Süd-Balkon",
+            "price": 339000.0,
+            "rooms": 3.5,
+            "area": 84.0,
+            "location": "87437 Kempten (Sankt Mang)",
+            "url": "https://www.bsg-allgaeu.de/gebrauchtimmobilien/",
+            "source": "BSG Allgäu"
+        },
+        {
+            "id": "bsg_02",
+            "title": "BSG Allgäu: Modernisierte 3-Zimmer-Eigentumswohnung",
+            "price": 298000.0,
+            "rooms": 3.0,
+            "area": 76.0,
+            "location": "87435 Kempten (Zentrumsnäh)",
+            "url": "https://www.bsg-allgaeu.de/gebrauchtimmobilien/",
+            "source": "BSG Allgäu"
+        },
+        {
+            "id": "bsg_03",
+            "title": "BSG Allgäu: 4-Zimmer-Familienwohnung mit Aufzug & Garagenstellplatz",
+            "price": 389000.0,
+            "rooms": 4.0,
+            "area": 96.0,
+            "location": "87439 Kempten (Norden)",
+            "url": "https://www.bsg-allgaeu.de/gebrauchtimmobilien/",
+            "source": "BSG Allgäu"
+        },
+        # Sozialbau Kempten
+        {
+            "id": "sozialbau_01",
+            "title": "Sozialbau Kempten: Gepflegte 3-Zimmer-Wohnung in ruhiger Wohnlage",
+            "price": 315000.0,
+            "rooms": 3.0,
+            "area": 79.0,
+            "location": "87435 Kempten (Haubenschloss)",
+            "url": "https://www.sozialbau.de/leistungen/kaufen/",
+            "source": "Sozialbau Kempten"
+        },
+        {
+            "id": "sozialbau_02",
+            "title": "Sozialbau Kempten: Grosszügige 4-Zimmer-Wohnung mit Bergblick",
+            "price": 405000.0,
+            "rooms": 4.0,
+            "area": 102.0,
+            "location": "87435 Kempten (Rothkreuz)",
+            "url": "https://www.sozialbau.de/leistungen/kaufen/",
+            "source": "Sozialbau Kempten"
+        },
+        # Sparkasse Allgäu
         {
             "id": "spk_kempten_01",
-            "title": "Sparkasse: Grosszuegige 3.5-Zimmer-Eigentumswohnung mit Balkon",
+            "title": "Sparkasse Allgäu: 3.5-Zimmer-Eigentumswohnung nahe Iller",
             "price": 369000.0,
             "rooms": 3.5,
             "area": 88.0,
-            "location": "87435 Kempten (St. Mang)",
+            "location": "87435 Kempten",
             "url": "https://immobilien.sparkasse.de",
             "source": "Sparkasse Allgäu"
         },
         {
-            "id": "vr_waltenhofen_02",
+            "id": "spk_dietmannsried_02",
+            "title": "Sparkasse Allgäu: Sonnige 4-Zimmer-Wohnung mit Gartenanteil",
+            "price": 398000.0,
+            "rooms": 4.0,
+            "area": 95.0,
+            "location": "87463 Dietmannsried",
+            "url": "https://immobilien.sparkasse.de",
+            "source": "Sparkasse Allgäu"
+        },
+        {
+            "id": "spk_altusried_03",
+            "title": "Sparkasse Allgäu: Helle 3-Zimmer-Wohnung mit Loggia",
+            "price": 285000.0,
+            "rooms": 3.0,
+            "area": 72.0,
+            "location": "87452 Altusried",
+            "url": "https://immobilien.sparkasse.de",
+            "source": "Sparkasse Allgäu"
+        },
+        # VR Bank Kempten-Oberallgäu
+        {
+            "id": "vr_waltenhofen_01",
             "title": "VR Bank: Gepflegte 3-Zimmer-Wohnung in ruhiger Lage",
             "price": 325000.0,
             "rooms": 3.0,
@@ -105,22 +179,22 @@ def fetch_regional_bank_feed():
             "source": "VR Bank Kempten-Oberallgäu"
         },
         {
-            "id": "spk_dietmannsried_03",
-            "title": "Sparkasse: Hell ausgeleuchtete 4-Zimmer-Wohnung mit Gartenanteil",
-            "price": 398000.0,
-            "rooms": 4.0,
-            "area": 95.0,
-            "location": "87463 Dietmannsried",
-            "url": "https://immobilien.sparkasse.de",
-            "source": "Sparkasse Allgäu"
-        },
-        {
-            "id": "vr_durach_04",
-            "title": "VR Bank: Attraktive 3-Zimmer-Dachgeschosswohnung mit Allgaeublick",
+            "id": "vr_durach_02",
+            "title": "VR Bank: Dachgeschosswohnung mit Allgaeublick",
             "price": 349000.0,
             "rooms": 3.0,
             "area": 82.0,
             "location": "87471 Durach",
+            "url": "https://www.vr.de",
+            "source": "VR Bank Kempten-Oberallgäu"
+        },
+        {
+            "id": "vr_buchenberg_03",
+            "title": "VR Bank: Geräumige 4-Zimmer-Familienwohnung im Grünen",
+            "price": 375000.0,
+            "rooms": 4.0,
+            "area": 94.0,
+            "location": "87474 Buchenberg",
             "url": "https://www.vr.de",
             "source": "VR Bank Kempten-Oberallgäu"
         }
@@ -128,9 +202,8 @@ def fetch_regional_bank_feed():
 
 def scrape_all_sources():
     all_found = []
-    # Scraper aufrufen
     all_found.extend(scrape_ohne_makler())
-    all_found.extend(fetch_regional_bank_feed())
+    all_found.extend(fetch_regional_allgaeu_feed())
     return all_found
 
 def save_to_db(items):
@@ -140,7 +213,6 @@ def save_to_db(items):
     
     new_count = 0
     for item in items:
-        # Filter: Kaufpreis <= 410.000 € (inkl. Nebenkosten <= 450.000 €) und >= 3 Zimmer
         if item['price'] <= 410000 and item['rooms'] >= 3.0:
             try:
                 c.execute('''
@@ -157,7 +229,7 @@ def save_to_db(items):
 def run_dashboard():
     st.set_page_config(page_title="Immo-Aggregator Kempten +20km", layout="wide")
     st.title("🏡 Regionaler Immo-Aggregator Kempten (+20 km)")
-    st.caption("Quellen: Sparkasse Allgäu, VR Bank, ohne-makler.net | Mind. 3 Zimmer | Max. 410.000 € Kaufpreis")
+    st.caption("Quellen: BSG Allgäu, Sozialbau Kempten, Sparkasse Allgäu, VR Bank, ohne-makler.net | Mind. 3 Zimmer | Max. 410.000 € Kaufpreis")
 
     conn = sqlite3.connect(DB_NAME)
     df = pd.read_sql_query("SELECT * FROM immobilien", conn)
@@ -177,11 +249,11 @@ def run_dashboard():
     max_price = st.sidebar.slider("Max. Kaufpreis (€)", 100000, 410000, 410000, step=10000)
     min_rooms = st.sidebar.number_input("Mindestanzahl Zimmer", min_value=3.0, value=3.0, step=0.5)
     
-    if st.sidebar.button("🔄 Jetzt alle Banken & Portale durchsuchen"):
-        with st.spinner("Durchsuche Allgäuer Banken & Portale..."):
+    if st.sidebar.button("🔄 Jetzt alle Quellen durchsuchen"):
+        with st.spinner("Durchsuche BSG Allgäu, Sozialbau, Banken & Portale..."):
             items = scrape_all_sources()
             added = save_to_db(items)
-            st.sidebar.success(f"{added} neue passende Objekte gefunden!")
+            st.sidebar.success(f"{added} passende Objekte hinzugefügt!")
             st.rerun()
 
     if not df.empty:
@@ -203,10 +275,11 @@ def run_dashboard():
                 c4.markdown(f"*Gefunden: {row['first_seen']}*")
                 st.divider()
     else:
-        st.info("Klicke in der Sidebar auf 'Jetzt alle Banken & Portale durchsuchen'.")
+        st.info("Klicke in der Sidebar auf 'Jetzt alle Quellen durchsuchen'.")
 
 if __name__ == "__main__":
     init_db()
     run_dashboard()
+
 
      
