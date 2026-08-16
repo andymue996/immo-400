@@ -217,26 +217,102 @@ def _generic_static_scrape(source_name, url, card_selectors, price_default=None)
 
 
 def scrape_ohne_makler():
-    return _generic_static_scrape(
-        "ohne-makler.net",
-        "https://www.ohne-makler.net/immobilien/wohnung-kaufen/bayern/kempten-allgau/",
-        card_selectors=["article", ".om-estate-card", ".search-list-item", ".estate-card"],
-    )
+    """
+    VERIFIZIERT (16.08.2026): Angebote sind serverseitig im HTML enthalten.
+    Jede Karte ist EIN <a href="/immobilie/<ID>/">-Link, der Titel, Preis,
+    PLZ/Ort und Eckdaten im Linktext bündelt. Deshalb hier kein Karten-Selektor
+    (article/div-Klasse), sondern direkt der URL-Pattern-Ansatz - robuster,
+    weil er nicht von wechselnden CSS-Klassen abhängt.
+    """
+    source_name = "ohne-makler.net"
+    url = "https://www.ohne-makler.net/immobilien/wohnung-kaufen/bayern/kempten-allgau/"
+    items = []
+    error = None
+    try:
+        res = requests.get(url, headers=HEADERS, timeout=12)
+        res.raise_for_status()
+        soup = BeautifulSoup(res.text, "html.parser")
+
+        seen_ids = set()
+        for a in soup.select('a[href*="/immobilie/"]'):
+            href = a.get("href", "")
+            m = re.search(r'/immobilie/(\d+)/', href)
+            if not m:
+                continue
+            listing_id = m.group(1)
+            if listing_id in seen_ids:
+                continue  # jede Karte erscheint als Bild-Link UND Text-Link -> dedupen
+            text = a.get_text(" ", strip=True)
+            if "€" not in text or not in_region(text):
+                continue
+
+            link = href if href.startswith("http") else "https://www.ohne-makler.net" + href
+            price = extract_number(text, r'([\d\.]{4,})\s*€', default=None)
+            # Muster im Linktext: "... (Ort) <Zimmer> <Fläche>m²" -> Zahl direkt vor "m²" ist Fläche,
+            # die Zahl davor ist die Zimmerzahl
+            area = extract_number(text, r'([\d,\.]+)\s*m²', default=None)
+            rooms = extract_number(text, r'(\d+)\s+[\d,\.]+\s*m²', default=None)
+            if price is None:
+                continue
+
+            title = text.split("€")[0].strip()[:100]
+            seen_ids.add(listing_id)
+            items.append({
+                "id": f"ohne_makler_{listing_id}",
+                "title": title,
+                "price": price,
+                "rooms": rooms,
+                "area": area,
+                "location": "Kempten & Umland",
+                "url": link,
+                "source": source_name,
+            })
+    except Exception as e:
+        error = f"{type(e).__name__}: {e}"
+
+    log_scrape(source_name, len(items), error)
+    polite_sleep()
+    return items
 
 
 def scrape_vr_bank():
-    return _generic_static_scrape(
-        "VR Bank Kempten-Oberallgäu",
-        "https://www.vrbank-ke-oa.de/privatkunden/immobilie-und-wohnen/produkte/immobilien/immobiliensuche.html",
-        card_selectors=[".teaser", ".immo-item", "article", ".result-item"],
-    )
+    """
+    GEPRÜFT (16.08.2026): Die Immobiliensuche läuft über ein eingebettetes
+    FlowFact-Widget (https://432638.flowfact-sites.net/immoframe/), dessen
+    robots.txt automatisierten Zugriff EXPLIZIT untersagt. Wir respektieren
+    das und scrapen hier bewusst nichts - stattdessen nur ein Hinweis-Eintrag
+    mit Link. Empfehlung: auf der VR-Bank-Seite einen kostenlosen
+    E-Mail-Suchauftrag einrichten, das ist der offizielle Weg an diese Daten.
+    """
+    source_name = "VR Bank Kempten-Oberallgäu"
+    log_scrape(source_name, 0, "Übersprungen: robots.txt des Anbieters verbietet Scraping (FlowFact-Widget). "
+                                "Bitte manuell E-Mail-Suchauftrag einrichten.")
+    return [{
+        "id": "vr_bank_hinweis",
+        "title": "VR Bank Immobiliensuche (manuell prüfen / E-Mail-Suchauftrag einrichten)",
+        "price": None,
+        "rooms": None,
+        "area": None,
+        "location": "Kempten & Umland",
+        "url": "https://www.vrbank-ke-oa.de/privatkunden/immobilie-und-wohnen/produkte/immobilien/immobiliensuche.html",
+        "source": source_name,
+    }]
 
 
 def scrape_sparkasse_allgaeu():
-    return _generic_static_scrape(
-        "Sparkasse Allgäu",
+    """
+    GEPRÜFT (16.08.2026): Next.js-Seite, Angebote werden erst per Client-side
+    JavaScript nachgeladen (Platzhaltertext "Lädt..." im Server-HTML).
+    requests+BeautifulSoup sieht daher NIE echte Angebote. Braucht Playwright
+    (siehe PLAYWRIGHT_SCRAPERS) oder die zugrunde liegende API - letztere
+    wurde hier nicht identifiziert.
+    """
+    source_name = "Sparkasse Allgäu"
+    return _generic_playwright_scrape(
+        source_name,
         "https://immobilien.sparkasse.de/immobilien/bayern/kempten.html",
-        card_selectors=[".immo-list-item", ".search-result", "article", ".card"],
+        card_selector="a[href*='/immobilien/objekt']",  # Best-Guess, ggf. anpassen
+        wait_selector=None,
     )
 
 
@@ -274,13 +350,13 @@ def scrape_herzstuben():
 
 STATIC_SCRAPERS = [
     scrape_ohne_makler,
-    scrape_vr_bank,
-    scrape_sparkasse_allgaeu,
+    scrape_vr_bank,  # scrapt nichts mehr, siehe Docstring - liefert nur Hinweis-Link
     scrape_sozialbau,
     scrape_hold_immobilien,
     scrape_brimo,
     scrape_herzstuben,
 ]
+# Sparkasse braucht Playwright (JS-Rendering) - siehe scrape_sparkasse_allgaeu()
 
 
 # ----------------------------------------------------------------------
@@ -397,6 +473,7 @@ PLAYWRIGHT_SCRAPERS = [
     scrape_immoscout24,
     scrape_immowelt,
     scrape_kleinanzeigen,
+    scrape_sparkasse_allgaeu,
 ]
 
 
@@ -499,7 +576,9 @@ def run_dashboard():
     min_rooms = st.sidebar.number_input("Mindestanzahl Zimmer (0 = egal)", min_value=0.0, value=0.0, step=0.5)
 
     if not df.empty:
-        filtered_df = df[df['price'] <= max_price]
+        # Hinweis-Einträge ohne Preis (z.B. VR Bank robots.txt-Hinweis) immer anzeigen,
+        # sonst nach Preis filtern
+        filtered_df = df[df['price'].isna() | (df['price'] <= max_price)]
         if min_rooms > 0:
             filtered_df = filtered_df[filtered_df['rooms'].fillna(0) >= min_rooms]
 
@@ -514,7 +593,8 @@ def run_dashboard():
             with st.container():
                 c1, c2, c3, c4 = st.columns([3, 1, 1, 1])
                 c1.markdown(f"**[{row['title']}]({row['url']})**  \n📍 {row['location']} | Quelle: **{row['source']}**")
-                c2.markdown(f"**Preis:** {row['price']:,.0f} €")
+                price_txt = f"{row['price']:,.0f} €" if pd.notna(row['price']) else "siehe Portal"
+                c2.markdown(f"**Preis:** {price_txt}")
                 rooms_txt = f"{row['rooms']:.1f}" if pd.notna(row['rooms']) else "?"
                 area_txt = f"{row['area']:.0f}" if pd.notna(row['area']) else "?"
                 c3.markdown(f"**Zimmer:** {rooms_txt} | **Fläche:** {area_txt} m²")
@@ -527,5 +607,3 @@ def run_dashboard():
 if __name__ == "__main__":
     init_db()
     run_dashboard()
-
-
